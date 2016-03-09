@@ -88,7 +88,9 @@ DATABASES = {
   'default': {
     'ENGINE': 'django.contrib.gis.db.backends.postgis',
     'NAME': 'whereTo',
-    'USER': 'blaz',
+    'HOST': 'localhost',
+    'PORT': '5432',
+    'USER': 'postgres',
   }
 }
 
