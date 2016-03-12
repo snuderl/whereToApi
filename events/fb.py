@@ -12,7 +12,7 @@ token = "CAACEdEose0cBACCsaK5qCeeTiE6jCm5gs0BlkpK1ifAwWeUuwOZCtDkbRYHXW1w7qZA8nm
 def parse_places(data):
   for place in data:
     loc = place["location"]
-    point = Point(loc["longitude"], loc["latitude"], srid=4326)
+    point = Point(loc["latitude"], loc["longitude"], srid=4326)
     fb_id = place["id"]
     Place.objects.update_or_create(
       facebook_id=fb_id, name=place["name"], coords=point,
