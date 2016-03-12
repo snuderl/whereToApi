@@ -60,6 +60,10 @@ def parse_events(data, place):
       if cover:
         event.cover = cover["source"]
 
+      owner = record.get('owner')
+      if owner:
+        event.owner = owner['name']
+
       event.start_time = record["start_time"]
       event.end_time = record.get('end_time')
       event.coords = place.coords
@@ -91,6 +95,7 @@ def fetch_events(url, params={}, place=None):
 def fetch_events_by_location_name(name):
   g = geocoder.google(name)
   lat, lng = g.latlng
+
 
 @asyncio.coroutine
 def fetch_events_for_place(place):
