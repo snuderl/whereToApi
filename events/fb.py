@@ -61,6 +61,7 @@ def parse_events(data, place):
         event.cover = cover["source"]
 
       event.start_time = record["start_time"]
+      event.end_time = record.get('end_time')
       event.coords = place.coords
 
       event.save()
@@ -96,7 +97,7 @@ def fetch_events_for_place(place):
   print("Fetching events for %s" % place.name)
   url = base_url + "/" + place.facebook_id
   params = {
-    "fields": "events{attending_count,name,description,cover,start_time,owner}",
+    "fields": "events{attending_count,name,description,cover,start_time,end_time,owner}",
     "access_token": token
   }
   yield from fetch_events(url, params, place)
