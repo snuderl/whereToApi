@@ -18,7 +18,7 @@ class Place(models.Model):
 
 class Event(models.Model):
   name = models.TextField()
-  description = models.TextField(blank=True,null=True)
+  description = models.TextField(blank=True, null=True)
   place = models.ForeignKey(Place)
   attending_count = models.IntegerField()
   facebook_id = models.TextField(blank=True, null=True, unique=True)
