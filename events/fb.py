@@ -6,7 +6,7 @@ import asyncio
 
 
 base_url = "https://graph.facebook.com/v2.5/"
-token = "CAACEdEose0cBACCsaK5qCeeTiE6jCm5gs0BlkpK1ifAwWeUuwOZCtDkbRYHXW1w7qZA8nm27Gva4zd3WZBRSVoHrkkC7WeTdZCfX1g7YZCriwaEHUxF62cfwp1LFM0ZB25p3S8lUEYxnQtnJT73h20ZAKkriGXGfv4rI1e0eQJwfCugJFMZAXQ0xK5GQyclaZBZBd7XuUU3iAfrTWzDCFZBS0r3"
+token = "CAACEdEose0cBAKiDUNWfeY5lYdi0MDQEAV96gihiQfg40usCz12epg7YBXhozt4IbS4D24mdfDf9NZBrWyAeeV2h1NLm72FtnD8y3bRJgunLl91qYqL7ZAYEHfYSYrtzmxLZCcnhKaYPpOpdz4d4cp2Yke3k3GeCqBJ6LutJSfbYQB9XotdFTHyDpIQEQmzMYvh7udZB0nB1TxYiHZBZAe"
 
 
 def parse_places(data):
@@ -92,7 +92,7 @@ def fetch_events_for_place(place):
   print("Fetching events for %s" % place.name)
   url = base_url + "/" + place.facebook_id
   params = {
-    "fields": "events{attending_count,name,description,cover,start_time.owner}",
+    "fields": "events{attending_count,name,description,cover,start_time,owner}",
     "access_token": token
   }
   yield from fetch_events(url, params, place)
