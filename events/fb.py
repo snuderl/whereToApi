@@ -87,6 +87,10 @@ def fetch_events(url, params={}, place=None):
     yield from fetch_events(next_url, place=place)
 
 
+def fetch_events_by_location_name(name):
+  g = geocoder.google(name)
+  lat, lng = g.latlng
+
 @asyncio.coroutine
 def fetch_events_for_place(place):
   print("Fetching events for %s" % place.name)

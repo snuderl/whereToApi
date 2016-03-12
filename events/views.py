@@ -36,13 +36,13 @@ class PlaceViewSet(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = self.queryset
+        queryset = Place.objects.all()
         queryset = location_name_filter(queryset, self.request.query_params)
         return queryset
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Place.objects.all()
+    queryset = Event.objects.all()
     serializer_class = EventSerializer
     distance_filter_field = 'coords'
     distance_filter_convert_meters = True
@@ -55,7 +55,7 @@ class EventViewSet(viewsets.ModelViewSet):
         Optionally restricts the returned purchases to a given user,
         by filtering against a `username` query parameter in the URL.
         """
-        queryset = self.queryset
+        queryset = Event.objects.all()
         queryset = location_name_filter(queryset, self.request.query_params)
         return queryset
 
