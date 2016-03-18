@@ -6,7 +6,7 @@ import asyncio
 
 
 base_url = "https://graph.facebook.com/v2.5/"
-token = "CAACEdEose0cBAKiDUNWfeY5lYdi0MDQEAV96gihiQfg40usCz12epg7YBXhozt4IbS4D24mdfDf9NZBrWyAeeV2h1NLm72FtnD8y3bRJgunLl91qYqL7ZAYEHfYSYrtzmxLZCcnhKaYPpOpdz4d4cp2Yke3k3GeCqBJ6LutJSfbYQB9XotdFTHyDpIQEQmzMYvh7udZB0nB1TxYiHZBZAe"
+token = "CAACEdEose0cBANJd2muR06Aq3YbYmtX3nB53IqI4ZBzSlsE8joWHUXtLUKWYGYFWoxmPFakd3KTvResoQ3klHi2mZAyHZAt6VJJvreLIOOwMkZBWzOS0MZB2yCEzNK3VmedWFqoxBEtB8lqWw6SLAeIflbZAtgTYU4BYF5VOe75USambxrzQOUQwbeIH0WoZA71XVx2tnlxXZA9c0HDpudxF"
 
 
 def parse_places(data):
@@ -14,9 +14,21 @@ def parse_places(data):
     loc = place["location"]
     point = Point(loc["latitude"], loc["longitude"], srid=4326)
     fb_id = place["id"]
-    Place.objects.update_or_create(
-      facebook_id=fb_id, name=place["name"], coords=point,
-      city=loc.get("city"), country=loc.get("country"), street=loc.get("street"))
+    yield parse_place(place)
+
+
+def parse_place(data):
+  loc = data["location"]
+  point = Point(loc["latitude"], loc["longitude"], srid=4326)
+  fb_id = data["id"]
+  return {
+    "facebook_id": fb_id,
+    "name": data["name"],
+    "coords": point,
+    "city": loc.get("city"),
+    "country": loc.get("country"),
+    "street": loc.get("street")
+  }
 
 
 def fetch_places(url, params={}):
@@ -24,13 +36,31 @@ def fetch_places(url, params={}):
   print(response)
 
   data = response.json()
-  parse_places(data["data"])
+  for place in parse_places(data["data"]):
+    yield place
 
   pagination = data["paging"]
   if pagination and "next" in pagination:
     next_url = pagination["next"]
-    print("Processing next page %s" % next_url)
-    fetch_places(next_url)
+    print(pagination)
+    if next_url:
+      print("Processing next page %s" % next_url)
+      for place in fetch_places(next_url):
+        yield place
+
+
+def fetch_places_query(query):
+  url = base_url + "/search"
+  params = {
+    "type": "place",
+    "access_token": token,
+    "limit": 500
+  }
+
+  if query:
+    params["q"] = query
+
+  return list(fetch_places(url, params))
 
 
 def fetch_places_for_location(lat, lng):
@@ -40,7 +70,8 @@ def fetch_places_for_location(lat, lng):
     "center": "%s,%s" % (lat, lng),
     "access_token": token
   }
-  fetch_places(url, params)
+  for place in fetch_places(url, params):
+    Place.objets.update_or_create(**place)
 
 
 def parse_events(data, place):
