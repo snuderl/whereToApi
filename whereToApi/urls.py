@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from events.views import PlaceViewSet, EventViewSet, query_places
+from events.views import PlaceViewSet, EventViewSet, query_places, add_place
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -24,6 +24,7 @@ router.register(r'events', EventViewSet)
 
 urlpatterns = [
     url(r'^fb/places/', query_places),
+    url(r'^places/add/(?P<fb_id>\d+)', add_place),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^', include(router.urls)),
 ]

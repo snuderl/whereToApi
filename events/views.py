@@ -8,7 +8,7 @@ import geocoder
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 from datetime import datetime
-from .fb import fetch_places_query
+from .fb import fetch_places_query, add_place_by_id
 from rest_framework.decorators import api_view
 
 
@@ -40,6 +40,15 @@ def query_places(request):
     data = fetch_places_query(q)
     serializer = PlaceSerializer(data, many=True)
     return Response(serializer.data)
+
+
+@api_view(['POST'])
+def add_place(request, fb_id):
+    place, created = add_place_by_id(fb_id)
+    if created:
+        return Response("Place added.")
+    else:
+        return Response("Place already exists.")
 
 
 class PlaceViewSet(viewsets.ModelViewSet):

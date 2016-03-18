@@ -11,9 +11,6 @@ token = "CAACEdEose0cBANJd2muR06Aq3YbYmtX3nB53IqI4ZBzSlsE8joWHUXtLUKWYGYFWoxmPFa
 
 def parse_places(data):
   for place in data:
-    loc = place["location"]
-    point = Point(loc["latitude"], loc["longitude"], srid=4326)
-    fb_id = place["id"]
     yield parse_place(place)
 
 
@@ -61,6 +58,22 @@ def fetch_places_query(query):
     params["q"] = query
 
   return list(fetch_places(url, params))
+
+
+def add_place_by_id(fb_id):
+  fields = {"fields": "location,name,id"}
+  data = fetch_resource_by_id(fb_id, fields)
+  place = parse_place(data)
+  return Place.objects.update_or_create(**place)
+
+
+def fetch_resource_by_id(fb_id, fields):
+  url = base_url + "/" + fb_id
+  params = {"access_token": token}
+  params.update(fields)
+
+  response = requests.get(url, params=params)
+  return response.json()
 
 
 def fetch_places_for_location(lat, lng):
