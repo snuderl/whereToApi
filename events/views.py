@@ -72,7 +72,6 @@ class PlaceViewSet(viewsets.ModelViewSet):
     distance_filter_convert_meters = True
     filter_backends = (DistanceToPointFilter, )
     bbox_filter_include_overlapping = True
-    filter_backends = (filters.DjangoFilterBackend,)
 
     def get_queryset(self):
         """
@@ -91,7 +90,6 @@ class EventViewSet(viewsets.ModelViewSet):
     distance_filter_convert_meters = True
     filter_backends = (DistanceToPointFilter, )
     bbox_filter_include_overlapping = True
-    filter_backends = (filters.DjangoFilterBackend,)
 
     def get_queryset(self):
         """
