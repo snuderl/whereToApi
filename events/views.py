@@ -8,9 +8,8 @@ import geocoder
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
 from datetime import datetime
-from .fb import fetch_places_query, add_place_by_id
+from .fb import fetch_places_query, add_place_by_id, FbError
 from rest_framework.decorators import api_view
-
 
 
 DEFAULT_DISTANCE = 4000
@@ -37,14 +36,29 @@ def keep_old_events(qs, query_params):
 def query_places(request):
     q = request.GET.get("q")
 
-    data = fetch_places_query(q)
+    token = request.GET.get('token')
+    if not token:
+        return Response({"token": "Facebook token missing."}, status=400)
+
+    try:
+        data = fetch_places_query(q, token)
+    except FbError as e:
+        return Response(e.message(), status=400)
+
     serializer = PlaceSerializer(data, many=True)
     return Response(serializer.data)
 
 
 @api_view(['POST'])
 def add_place(request, fb_id):
-    place, created = add_place_by_id(fb_id)
+    token = request.GET.get('token')
+    if not token:
+        return Response({"token": "Facebook token missing."}, status=400)
+
+    try:
+        place, created = add_place_by_id(fb_id, token)
+    except FbError as e:
+        return Response(e.message(), status=400)
     if created:
         return Response("Place added.")
     else:

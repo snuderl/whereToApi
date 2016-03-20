@@ -9,6 +9,17 @@ base_url = "https://graph.facebook.com/v2.5/"
 token = "CAACEdEose0cBANJd2muR06Aq3YbYmtX3nB53IqI4ZBzSlsE8joWHUXtLUKWYGYFWoxmPFakd3KTvResoQ3klHi2mZAyHZAt6VJJvreLIOOwMkZBWzOS0MZB2yCEzNK3VmedWFqoxBEtB8lqWw6SLAeIflbZAtgTYU4BYF5VOe75USambxrzQOUQwbeIH0WoZA71XVx2tnlxXZA9c0HDpudxF"
 
 
+class FbError(Exception):
+  def __init__(self, response):
+    super(FbError, self).__init__()
+    self.response = response
+
+  def message(self):
+    data = self.response.json()
+    error = data['error']
+    return error
+
+
 def parse_places(data):
   for place in data:
     yield parse_place(place)
@@ -33,20 +44,25 @@ def fetch_places(url, params={}):
   print(response)
 
   data = response.json()
-  for place in parse_places(data["data"]):
-    yield place
 
-  pagination = data["paging"]
-  if pagination and "next" in pagination:
-    next_url = pagination["next"]
-    print(pagination)
-    if next_url:
-      print("Processing next page %s" % next_url)
-      for place in fetch_places(next_url):
-        yield place
+  if response.status_code == requests.codes.ok:
+    for place in parse_places(data["data"]):
+      yield place
+
+    pagination = data["paging"]
+    if pagination and "next" in pagination:
+      next_url = pagination["next"]
+      print(pagination)
+      if next_url:
+        print("Processing next page %s" % next_url)
+        for place in fetch_places(next_url):
+          yield place
+  else:
+    print(data)
+    raise FbError(response)
 
 
-def fetch_places_query(query):
+def fetch_places_query(query, token):
   url = base_url + "/search"
   params = {
     "type": "place",
@@ -60,14 +76,14 @@ def fetch_places_query(query):
   return list(fetch_places(url, params))
 
 
-def add_place_by_id(fb_id):
+def add_place_by_id(fb_id, token):
   fields = {"fields": "location,name,id"}
-  data = fetch_resource_by_id(fb_id, fields)
+  data = fetch_resource_by_id(fb_id, fields, token)
   place = parse_place(data)
   return Place.objects.update_or_create(**place)
 
 
-def fetch_resource_by_id(fb_id, fields):
+def fetch_resource_by_id(fb_id, fields, token=token):
   url = base_url + "/" + fb_id
   params = {"access_token": token}
   params.update(fields)
