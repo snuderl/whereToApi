@@ -14,15 +14,15 @@ token - facebook api token
 token - facebook api token
 
 ### List places [GET]
-/places?distance={distance}&point={point}
+/places?dist={distance}&point={point}
 
-distance - distance in meters
+dist - distance in meters
 
 point - latitude and longitude in format (lat, lng)
 
 ### List events [GET]
-/events?distance={disance}&point={point}
+/events?dist={disance}&point={point}
 
-distance - distance in meters
+dist - distance in meters
 
 point - latitude and longitude in format (lat, lng)
