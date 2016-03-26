@@ -17,10 +17,12 @@ token - facebook api token
 /places?distance={distance}&point={point}
 
 distance - distance in meters
+
 point - latitude and longitude in format (lat, lng)
 
 ### List events [GET]
 /events?distance={disance}&point={point}
 
 distance - distance in meters
+
 point - latitude and longitude in format (lat, lng)
