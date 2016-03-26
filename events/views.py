@@ -42,6 +42,10 @@ def query_places(request):
 
     try:
         data = fetch_places_query(q, token)
+        data_ids = [x['facebook_id'] for x in data]
+        existing_places = set(Place.objects.values_list("facebook_id", flat=True)
+                                           .filter(facebook_id__in=data_ids))
+        data = [x for x in data if x['facebook_id'] not in existing_places]
     except FbError as e:
         return Response(e.message(), status=400)
 
