@@ -9,7 +9,7 @@ query - search string
 token - facebook api token
 
 ### Add place by id [POST]
-/places/add/<fb_id>?token={fbToken}
+/places/add/{fb_id}?token={fbToken}
 
 token - facebook api token
 
