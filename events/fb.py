@@ -82,7 +82,7 @@ def add_place_by_id(fb_id, token):
   fields = {"fields": "location,name,id,picture"}
   data = fetch_resource_by_id(fb_id, fields, token)
   place = parse_place(data)
-  return Place.objects.update_or_create(**place)
+  return Place.objects.update_or_create(place, facebook_id=fb_id)
 
 
 def fetch_resource_by_id(fb_id, fields, token=token):
