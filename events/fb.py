@@ -29,20 +29,22 @@ def parse_place(data):
   loc = data["location"]
   point = Point(loc["latitude"], loc["longitude"], srid=4326)
   fb_id = data["id"]
+  picture = None
+  if 'picture' in data:
+    picture = data['picture']['data']['url']
   return {
     "facebook_id": fb_id,
     "name": data["name"],
     "coords": point,
     "city": loc.get("city"),
     "country": loc.get("country"),
-    "street": loc.get("street")
+    "street": loc.get("street"),
+    "picture": picture
   }
 
 
 def fetch_places(url, params={}):
   response = requests.get(url, params=params)
-  print(response)
-
   data = response.json()
 
   if response.status_code == requests.codes.ok:
@@ -77,7 +79,7 @@ def fetch_places_query(query, token):
 
 
 def add_place_by_id(fb_id, token):
-  fields = {"fields": "location,name,id"}
+  fields = {"fields": "location,name,id,picture"}
   data = fetch_resource_by_id(fb_id, fields, token)
   place = parse_place(data)
   return Place.objects.update_or_create(**place)
