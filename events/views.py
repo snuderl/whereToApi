@@ -89,7 +89,7 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
-    queryset = Event.objects.all()
+    queryset = Event.objects.all().select_related('place')
     serializer_class = EventSerializer
     distance_filter_field = 'coords'
     distance_filter_convert_meters = True

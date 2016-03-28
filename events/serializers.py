@@ -20,6 +20,7 @@ class PlaceSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     coords = SimplePointField()
+    place_name = serializers.CharField(source="place.name")
 
     class Meta:
         model = Event
