@@ -9,6 +9,9 @@ base_url = "https://graph.facebook.com/v2.5/"
 token = "CAACEdEose0cBANJd2muR06Aq3YbYmtX3nB53IqI4ZBzSlsE8joWHUXtLUKWYGYFWoxmPFakd3KTvResoQ3klHi2mZAyHZAt6VJJvreLIOOwMkZBWzOS0MZB2yCEzNK3VmedWFqoxBEtB8lqWw6SLAeIflbZAtgTYU4BYF5VOe75USambxrzQOUQwbeIH0WoZA71XVx2tnlxXZA9c0HDpudxF"
 
 
+PLACE_FIELDS = {"fields": "location,name,id,picture.type(large),cover"}
+
+
 class FbError(Exception):
   def __init__(self, response):
     super(FbError, self).__init__()
@@ -83,8 +86,7 @@ def fetch_places_query(query, token):
 
 
 def add_place_by_id(fb_id, token):
-  fields = {"fields": "location,name,id,picture"}
-  data = fetch_resource_by_id(fb_id, fields, token)
+  data = fetch_resource_by_id(fb_id, PLACE_FIELDS, token)
   place = parse_place(data)
   return Place.objects.update_or_create(place, facebook_id=fb_id)
 
