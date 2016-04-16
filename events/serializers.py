@@ -16,12 +16,14 @@ class PlaceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Place
+        exclude = ("id", )
 
 
 class EventSerializer(serializers.ModelSerializer):
     coords = SimplePointField()
-    place_name = serializers.CharField(source="place.name")
+    place_facebook_id = serializers.CharField(source="place.facebook_id")
 
     class Meta:
         model = Event
+        exclude = ("id", "place")
 
