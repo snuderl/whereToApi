@@ -27,3 +27,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         exclude = ("id", "place")
 
+
+class EventPlaceSerializer(serializers.Serializer):
+    events = EventSerializer(many=True)
+    places = PlaceSerializer(many=True)

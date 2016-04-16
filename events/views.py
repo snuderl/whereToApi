@@ -2,7 +2,7 @@ from .models import Place, Event
 from rest_framework import viewsets
 from rest_framework_gis.filters import DistanceToPointFilter
 from rest_framework.response import Response
-from .serializers import EventSerializer, PlaceSerializer
+from .serializers import EventSerializer, PlaceSerializer, EventPlaceSerializer
 from rest_framework import filters
 import geocoder
 from django.contrib.gis.geos import Point
@@ -106,3 +106,13 @@ class EventViewSet(viewsets.ModelViewSet):
         queryset = location_name_filter(queryset, self.request.query_params)
         queryset = keep_old_events(queryset, self.request.query_params)
         return queryset
+
+    def list(self, request):
+        events = self.get_queryset()
+        places = Place.objects.filter(id__in=set(x.place.id for x in events))
+
+        serializer = EventPlaceSerializer({
+            "events": events,
+            "places": places
+        })
+        return Response(serializer.data)
