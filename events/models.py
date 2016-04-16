@@ -11,6 +11,7 @@ class Place(models.Model):
   country = models.TextField(blank=True, null=True)
   street = models.TextField(blank=True, null=True)
   picture = models.TextField(blank=True, null=True)
+  cover = models.TextField(blank=True, null=True)
   objects = models.GeoManager()
 
   def __str__(self):

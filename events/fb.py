@@ -32,6 +32,9 @@ def parse_place(data):
   picture = None
   if 'picture' in data:
     picture = data['picture']['data']['url']
+  cover = data.get("cover")
+  if cover:
+    cover = cover["source"]
   return {
     "facebook_id": fb_id,
     "name": data["name"],
@@ -39,7 +42,8 @@ def parse_place(data):
     "city": loc.get("city"),
     "country": loc.get("country"),
     "street": loc.get("street"),
-    "picture": picture
+    "picture": picture,
+    "cover": cover
   }
 
 
