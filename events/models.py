@@ -28,7 +28,7 @@ class Event(models.Model):
   owner = models.TextField()
   cover = models.TextField()
   start_time = models.DateTimeField()
-  end_tiem = models.DateTimeField(blank=True, null=True)
+  end_time = models.DateTimeField(blank=True, null=True)
 
   coords = models.PointField()
 
