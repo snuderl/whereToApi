@@ -100,8 +100,17 @@ class EventViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         events = self.filter_queryset(self.get_queryset())
-        places = Place.objects.filter(id__in=set(x.place.id for x in events))
 
+        page = self.paginate_queryset(events)
+        if page is not None:
+            places = Place.objects.filter(id__in=set(x.place.id for x in page))
+            serializer = EventPlaceSerializer({
+                "events": page,
+                "places": places
+            })
+            return self.get_paginated_response(serializer.data)
+
+        places = Place.objects.filter(id__in=set(x.place.id for x in events))
         serializer = EventPlaceSerializer({
             "events": events,
             "places": places
