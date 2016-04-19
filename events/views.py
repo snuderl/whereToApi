@@ -32,6 +32,16 @@ def keep_old_events(qs, query_params):
     return qs
 
 
+class LocationNameFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, qs, view):
+        return location_name_filter(qs, request.query_params)
+
+
+class KeepOldEventsFilter(filters.BaseFilterBackend):
+    def filter_queryset(self, request, qs, view):
+        return keep_old_events(qs, request.query_params)
+
+
 @api_view(['GET'])
 def query_places(request):
     q = request.GET.get("q")
@@ -74,18 +84,9 @@ class PlaceViewSet(viewsets.ModelViewSet):
     serializer_class = PlaceSerializer
     distance_filter_field = 'coords'
     distance_filter_convert_meters = True
-    filter_backends = (DistanceToPointFilter, )
+    filter_backends = (DistanceToPointFilter, LocationNameFilter)
     bbox_filter_include_overlapping = True
     lookup_field = 'facebook_id'
-
-    def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
-        queryset = Place.objects.all()
-        queryset = location_name_filter(queryset, self.request.query_params)
-        return queryset
 
 
 class EventViewSet(viewsets.ModelViewSet):
@@ -93,22 +94,12 @@ class EventViewSet(viewsets.ModelViewSet):
     serializer_class = EventSerializer
     distance_filter_field = 'coords'
     distance_filter_convert_meters = True
-    filter_backends = (DistanceToPointFilter, )
+    filter_backends = (DistanceToPointFilter, LocationNameFilter, KeepOldEventsFilter)
     bbox_filter_include_overlapping = True
     lookup_field = 'facebook_id'
 
-    def get_queryset(self):
-        """
-        Optionally restricts the returned purchases to a given user,
-        by filtering against a `username` query parameter in the URL.
-        """
-        queryset = Event.objects.all()
-        queryset = location_name_filter(queryset, self.request.query_params)
-        queryset = keep_old_events(queryset, self.request.query_params)
-        return queryset
-
     def list(self, request):
-        events = self.get_queryset()
+        events = self.filter_queryset(self.get_queryset())
         places = Place.objects.filter(id__in=set(x.place.id for x in events))
 
         serializer = EventPlaceSerializer({
