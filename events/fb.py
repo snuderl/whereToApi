@@ -144,12 +144,13 @@ def parse_events(data, place):
 @asyncio.coroutine
 def fetch_events(url, params={}, place=None):
   response = yield from aiohttp.get(url, params=params)
-  print(response)
+  json = yield from response.json()
 
-  data = (yield from response.json()).get("events")
+  data = json.get("events")
   if not data:
-    print("No events for %s" % place.name)
     return
+
+  print(len(data["data"]), " events found for ", place.name)
 
   yield from parse_events(data["data"], place)
 
