@@ -10,6 +10,8 @@ from django.contrib.gis.measure import Distance
 from datetime import datetime
 from .fb import fetch_places_query, add_place_by_id, FbError
 from rest_framework.decorators import api_view
+import django_filters
+from django import forms
 
 
 DEFAULT_DISTANCE = 4000
@@ -79,6 +81,32 @@ def add_place(request, fb_id):
         return Response("Place already exists.")
 
 
+def filter_keep_old(queryset, value):
+    if value and value == "True":
+        return queryset
+    return queryset.filter(start_time__gte=datetime.now())
+
+
+def filter_coords(queryset, value):
+    distance = DEFAULT_DISTANCE
+    print(value)
+    if value:
+        point = Point(*map(float, value.split(",")))
+        return queryset.filter(coords__distance_lt=(point, Distance(m=distance)))
+    return queryset
+
+
+class EventsFilter(filters.FilterSet):
+    name = django_filters.CharFilter(lookup_type='icontains')
+    keep_old = django_filters.ChoiceFilter(choices=(('True', 'True'), ('False', 'False')),
+                                           action=filter_keep_old)
+    coords = django_filters.CharFilter(action=filter_coords)
+
+    class Meta:
+        model = Event
+        fields = ['name', 'place', 'coords']
+
+
 class PlaceViewSet(viewsets.ModelViewSet):
     queryset = Place.objects.all()
     serializer_class = PlaceSerializer
@@ -90,6 +118,17 @@ class PlaceViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ModelViewSet):
+    queryset = Event.objects.all().select_related('place')
+    serializer_class = EventSerializer
+    distance_filter_field = 'coords'
+    distance_filter_convert_meters = True
+    bbox_filter_include_overlapping = True
+    filter_backends = (filters.DjangoFilterBackend, )
+    lookup_field = 'facebook_id'
+    filter_class = EventsFilter
+
+
+class EventPlaceViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().select_related('place')
     serializer_class = EventSerializer
     distance_filter_field = 'coords'
