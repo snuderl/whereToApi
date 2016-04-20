@@ -2,7 +2,7 @@ import requests
 from .models import Place, Event
 from django.contrib.gis.geos import Point
 import aiohttp
-import asyncio
+import requests
 
 
 base_url = "https://graph.facebook.com/v2.5/"
@@ -91,9 +91,7 @@ def add_place_by_id(fb_id, token, add_events=False):
   place, created = Place.objects.update_or_create(place, facebook_id=fb_id)
 
   if created and add_events:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(fetch_events_for_place(place, token))
+    fetch_events_for_place(place, token)
 
   return place, created
 
@@ -107,15 +105,16 @@ def fetch_resource_by_id(fb_id, fields, token=token):
   return response.json()
 
 
-def fetch_places_for_location(lat, lng):
+def fetch_places_for_location(lat, lng, add_events=True):
   url = base_url + "/search"
   params = {
-    "type": "place",
-    "center": "%s,%s" % (lat, lng),
-    "access_token": token
+      "type": "place",
+      "center": "%s,%s" % (lat, lng),
+      "access_token": token
   }
   for place in fetch_places(url, params):
-    Place.objets.update_or_create(**place)
+    place, created = add_place_by_id(place["facebook_id"], token, add_events)
+    print (place, created)
 
 
 def parse_events(data, place):
@@ -148,14 +147,16 @@ def parse_events(data, place):
       print(e)
 
 
-@asyncio.coroutine
-def fetch_events(url, params={}, place=None):
-  response = yield from aiohttp.get(url, params=params)
-  json = yield from response.json()
+def fetch_events(url, params={}, place=None, paginated=False):
+  response = requests.get(url, params=params)
+  json = response.json()
 
-  data = json.get("events")
-  if not data:
-    return
+  if paginated:
+    data = json
+  else:
+    data = json.get("events")
+    if not data:
+      return
 
   print(len(data["data"]), " events found for ", place.name)
 
@@ -165,7 +166,7 @@ def fetch_events(url, params={}, place=None):
   if pagination and "next" in pagination:
     next_url = pagination["next"]
     print("Processing next page %s" % next_url)
-    yield from fetch_events(next_url, place=place)
+    fetch_events(next_url, place=place, paginated=True)
 
 
 def fetch_events_by_location_name(name):
@@ -173,7 +174,6 @@ def fetch_events_by_location_name(name):
   lat, lng = g.latlng
 
 
-@asyncio.coroutine
 def fetch_events_for_place(place, token):
   print("Fetching events for %s" % place.name)
   url = base_url + "/" + place.facebook_id
@@ -181,12 +181,11 @@ def fetch_events_for_place(place, token):
     "fields": "events{attending_count,name,description,cover,start_time,end_time,owner}",
     "access_token": token
   }
-  yield from fetch_events(url, params, place)
+  fetch_events(url, params, place)
   print("Fetching events for %s complete." % place.name)
 
 
 def fetch_all_events():
-  loop = asyncio.get_event_loop()
-  requests = [fetch_events_for_place(place, token) for place in Place.objects.all()]
-  loop.run_until_complete(asyncio.wait(requests))
+  for place in Place.objects.all():
+    fetch_events_for_place(place, token)
   print("Done")
