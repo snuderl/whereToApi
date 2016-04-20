@@ -6,7 +6,7 @@ import requests
 
 
 base_url = "https://graph.facebook.com/v2.5/"
-token = "CAACEdEose0cBANJd2muR06Aq3YbYmtX3nB53IqI4ZBzSlsE8joWHUXtLUKWYGYFWoxmPFakd3KTvResoQ3klHi2mZAyHZAt6VJJvreLIOOwMkZBWzOS0MZB2yCEzNK3VmedWFqoxBEtB8lqWw6SLAeIflbZAtgTYU4BYF5VOe75USambxrzQOUQwbeIH0WoZA71XVx2tnlxXZA9c0HDpudxF"
+token = "CAACEdEose0cBAGGnQWWiDHN3TgXTqOz3hpsZBzRZC4tJW420cOoowEykx8a8WpD3zaF7L46D0mPVpciSHSODPSf9UZAW1fKPPG0D4995tjPDEc2h3j0WJpfBl3GzgD0Vcx79wZArTjGHqvY9fz69ZBilvYS6VZB9qaAcghm1ZCJgtxIif3ZAXx6SACK3zJ5nERbPtMoLdSbHl3q46lxsnoU3"
 
 
 PLACE_FIELDS = {"fields": "location,name,id,picture.type(large),cover"}
