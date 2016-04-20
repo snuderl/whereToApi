@@ -70,7 +70,7 @@ def add_place(request, fb_id):
         return Response({"token": "Facebook token missing."}, status=400)
 
     try:
-        place, created = add_place_by_id(fb_id, token)
+        place, created = add_place_by_id(fb_id, token, add_events=True)
     except FbError as e:
         return Response(e.message(), status=400)
     if created:

@@ -85,10 +85,17 @@ def fetch_places_query(query, token):
   return list(fetch_places(url, params))
 
 
-def add_place_by_id(fb_id, token):
+def add_place_by_id(fb_id, token, add_events=False):
   data = fetch_resource_by_id(fb_id, PLACE_FIELDS, token)
   place = parse_place(data)
-  return Place.objects.update_or_create(place, facebook_id=fb_id)
+  place, created = Place.objects.update_or_create(place, facebook_id=fb_id)
+
+  if created and add_events:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(fetch_events_for_place(place, token))
+
+  return place, created
 
 
 def fetch_resource_by_id(fb_id, fields, token=token):
@@ -152,7 +159,7 @@ def fetch_events(url, params={}, place=None):
 
   print(len(data["data"]), " events found for ", place.name)
 
-  yield from parse_events(data["data"], place)
+  parse_events(data["data"], place)
 
   pagination = data["paging"]
   if pagination and "next" in pagination:
@@ -167,7 +174,7 @@ def fetch_events_by_location_name(name):
 
 
 @asyncio.coroutine
-def fetch_events_for_place(place):
+def fetch_events_for_place(place, token):
   print("Fetching events for %s" % place.name)
   url = base_url + "/" + place.facebook_id
   params = {
@@ -180,6 +187,6 @@ def fetch_events_for_place(place):
 
 def fetch_all_events():
   loop = asyncio.get_event_loop()
-  requests = [fetch_events_for_place(place) for place in Place.objects.all()]
+  requests = [fetch_events_for_place(place, token) for place in Place.objects.all()]
   loop.run_until_complete(asyncio.wait(requests))
   print("Done")
