@@ -7,7 +7,7 @@ from rest_framework import filters
 import geocoder
 from django.contrib.gis.geos import Point
 from django.contrib.gis.measure import Distance
-from datetime import datetime
+from datetime import datetime, timedelta
 from .fb import fetch_places_query, add_place_by_id, FbError
 from rest_framework.decorators import api_view
 import django_filters
@@ -136,6 +136,11 @@ class EventPlaceViewSet(viewsets.ModelViewSet):
     filter_backends = (DistanceToPointFilter, LocationNameFilter, KeepOldEventsFilter)
     bbox_filter_include_overlapping = True
     lookup_field = 'facebook_id'
+
+    def get_queryset(self):
+        qs = Event.objects.all().select_related('place')
+        qs = qs.filter(start_time__lt=datetime.now() + timedelta(days=7))
+        return qs
 
     def list(self, request):
         events = self.filter_queryset(self.get_queryset())
