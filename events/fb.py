@@ -1,12 +1,9 @@
 import requests
 from .models import Place, Event
 from django.contrib.gis.geos import Point
-import aiohttp
-import requests
-
 
 base_url = "https://graph.facebook.com/v2.5/"
-token = "CAACEdEose0cBAGGnQWWiDHN3TgXTqOz3hpsZBzRZC4tJW420cOoowEykx8a8WpD3zaF7L46D0mPVpciSHSODPSf9UZAW1fKPPG0D4995tjPDEc2h3j0WJpfBl3GzgD0Vcx79wZArTjGHqvY9fz69ZBilvYS6VZB9qaAcghm1ZCJgtxIif3ZAXx6SACK3zJ5nERbPtMoLdSbHl3q46lxsnoU3"
+token = "EAACEdEose0cBAFU7rm8GoVluZB3bp4dg4ocwOSecuZBVjYesYWGAg8yqZCbbv6JZABNNycoA1WUCprQf8bn7Shwa0vmKl1ov4fWLTOgjaPB0R3tHs5hFHZBqIbOg2MAnzqgXBXbzXZALP38TddHheCW4RLrf413Is225o75LCYZAgZDZD"
 
 
 PLACE_FIELDS = {"fields": "location,name,id,picture.type(large),cover"}
@@ -67,6 +64,9 @@ def fetch_places(url, params={}):
         for place in fetch_places(next_url):
           yield place
   else:
+    # if data["error"]["is_transient"]:
+    #   print("Transient error for %s" % url)
+    #   return
     print(data)
     raise FbError(response)
 
@@ -96,7 +96,7 @@ def add_place_by_id(fb_id, token, add_events=False):
   return place, created
 
 
-def fetch_resource_by_id(fb_id, fields, token=token):
+def fetch_resource_by_id(fb_id, fields, token):
   url = base_url + "/" + fb_id
   params = {"access_token": token}
   params.update(fields)
@@ -105,7 +105,7 @@ def fetch_resource_by_id(fb_id, fields, token=token):
   return response.json()
 
 
-def fetch_places_for_location(lat, lng, add_events=True):
+def fetch_places_for_location(lat, lng, token, add_events=True):
   url = base_url + "/search"
   params = {
       "type": "place",
@@ -148,6 +148,7 @@ def parse_events(data, place):
 
 
 def fetch_events(url, params={}, place=None, paginated=False):
+  print(url, params)
   response = requests.get(url, params=params)
   json = response.json()
 
@@ -185,7 +186,7 @@ def fetch_events_for_place(place, token):
   print("Fetching events for %s complete." % place.name)
 
 
-def fetch_all_events():
-  for place in Place.objects.all():
+def fetch_all_events(token):
+  for place in Place.objects.all().order_by('-id'):
     fetch_events_for_place(place, token)
   print("Done")
